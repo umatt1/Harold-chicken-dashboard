@@ -1,6 +1,7 @@
 // TF-IDF Algorithm for extracting significant phrases from reviews
-// TF = Term Frequency (word in numerator)
-// IDF = Inverse Document Frequency (word in denominator)
+// TF = Term Frequency (measures how often a term appears in a document)
+// IDF = Inverse Document Frequency (measures how unique/significant a term is across all documents)
+// TF-IDF Score = TF × IDF (identifies significant terms by balancing frequency with uniqueness)
 
 class TFIDFAnalyzer {
     constructor() {

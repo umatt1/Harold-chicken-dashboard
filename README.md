@@ -37,9 +37,9 @@ Visit the live dashboard: [Harold's Chicken Dashboard](https://umatt1.github.io/
 
 The dashboard uses a custom TF-IDF (Term Frequency-Inverse Document Frequency) implementation to extract significant phrases from reviews:
 
-- **TF (Term Frequency)**: Measures how frequently a word appears in a document (numerator)
-- **IDF (Inverse Document Frequency)**: Measures how unique/significant a word is across all documents (denominator)
-- **TF-IDF Score**: TF × IDF = Significance score for each term
+- **TF (Term Frequency)**: Measures how frequently a term appears in a document (normalized by document length)
+- **IDF (Inverse Document Frequency)**: Measures how unique/significant a term is across all documents (higher for rare terms)
+- **TF-IDF Score**: TF × IDF = Combines frequency with uniqueness to identify the most significant terms
 
 This algorithm identifies the most meaningful phrases that distinguish each location's reviews, filtering out common words and highlighting unique characteristics mentioned by reviewers.
 
