@@ -3,6 +3,8 @@ let map;
 let markers = [];
 let allLocations = [];
 let currentView = 'map';
+let sortColumn = null;
+let sortDirection = 'asc';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', async () => {
@@ -104,7 +106,7 @@ function displayMarkers(locations) {
                 <p style="margin: 5px 0;"><strong>Neighborhood:</strong> ${location.neighborhood}</p>
                 <p style="margin: 5px 0;"><strong>Address:</strong> ${location.address}</p>
                 <p style="margin: 5px 0;"><strong>Rating:</strong> ⭐ ${location.rating} (${location.reviewCount} reviews)</p>
-                <button onclick="showDetails('${location.name}')" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Details</button>
+                <button onclick="showDetails(${JSON.stringify(location.name)})" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Details</button>
             </div>
         `;
         
@@ -178,6 +180,110 @@ function updateTable(locations) {
         
         tableBody.appendChild(row);
     });
+    
+    // Update sort indicators
+    updateSortIndicators();
+}
+
+// Sort table by column
+function sortTable(column) {
+    if (sortColumn === column) {
+        // Toggle direction if clicking same column
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        // New column, default to ascending
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+    
+    // Get current filtered locations
+    const currentLocations = getCurrentFilteredLocations();
+    
+    // Sort the locations
+    const sortedLocations = [...currentLocations].sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(column) {
+            case 'name':
+                aVal = a.name.toLowerCase();
+                bVal = b.name.toLowerCase();
+                break;
+            case 'neighborhood':
+                aVal = a.neighborhood.toLowerCase();
+                bVal = b.neighborhood.toLowerCase();
+                break;
+            case 'rating':
+                aVal = a.rating;
+                bVal = b.rating;
+                break;
+            case 'reviewCount':
+                aVal = a.reviewCount;
+                bVal = b.reviewCount;
+                break;
+            default:
+                return 0;
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    updateTable(sortedLocations);
+}
+
+// Get currently filtered locations
+function getCurrentFilteredLocations() {
+    const searchInput = document.getElementById('searchInput');
+    const neighborhoodFilter = document.getElementById('neighborhoodFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    
+    let filtered = allLocations;
+    
+    // Apply search filter
+    const searchTerm = searchInput.value.toLowerCase();
+    if (searchTerm) {
+        filtered = filtered.filter(loc => 
+            loc.name.toLowerCase().includes(searchTerm) ||
+            loc.address.toLowerCase().includes(searchTerm) ||
+            loc.neighborhood.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Apply neighborhood filter
+    if (neighborhoodFilter.value) {
+        filtered = filtered.filter(loc => loc.neighborhood === neighborhoodFilter.value);
+    }
+    
+    // Apply rating filter
+    if (ratingFilter.value) {
+        const [min, max] = ratingFilter.value.split('-').map(Number);
+        filtered = filtered.filter(loc => loc.rating >= min && loc.rating < max);
+    }
+    
+    return filtered;
+}
+
+// Update sort indicators on table headers
+function updateSortIndicators() {
+    // Remove all existing indicators
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        const existingArrow = th.querySelector('.sort-arrow');
+        if (existingArrow) existingArrow.remove();
+    });
+    
+    // Add indicator to current sort column
+    if (sortColumn) {
+        const th = document.querySelector(`th[data-sort="${sortColumn}"]`);
+        if (th) {
+            th.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+            const arrow = document.createElement('span');
+            arrow.className = 'sort-arrow';
+            arrow.textContent = sortDirection === 'asc' ? ' ▲' : ' ▼';
+            th.appendChild(arrow);
+        }
+    }
 }
 
 // Show detailed modal for a location
@@ -340,6 +446,38 @@ function applyFilters() {
         filtered = filtered.filter(loc => loc.rating >= min && loc.rating <= max);
     }
     
+    // If there's an active sort, re-sort the filtered results
+    if (sortColumn) {
+        filtered = [...filtered].sort((a, b) => {
+            let aVal, bVal;
+            
+            switch(sortColumn) {
+                case 'name':
+                    aVal = a.name.toLowerCase();
+                    bVal = b.name.toLowerCase();
+                    break;
+                case 'neighborhood':
+                    aVal = a.neighborhood.toLowerCase();
+                    bVal = b.neighborhood.toLowerCase();
+                    break;
+                case 'rating':
+                    aVal = a.rating;
+                    bVal = b.rating;
+                    break;
+                case 'reviewCount':
+                    aVal = a.reviewCount;
+                    bVal = b.reviewCount;
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+    
     displayMarkers(filtered);
     updateTable(filtered);
 }
@@ -349,6 +487,8 @@ function clearFilters() {
     document.getElementById('neighborhoodFilter').value = '';
     document.getElementById('ratingFilter').value = '';
     document.getElementById('searchInput').value = '';
+    sortColumn = null;
+    sortDirection = 'asc';
     displayMarkers(allLocations);
     updateTable(allLocations);
 }

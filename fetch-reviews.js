@@ -81,8 +81,12 @@ function extractNeighborhood(address) {
         // Return the area before "Chicago" or use zip code area
         const zipMatch = address.match(/IL\s+(\d{5})/);
         if (zipMatch) {
-            // Map common Chicago zip codes to neighborhoods (simplified)
+            // Map Chicago area zip codes to neighborhoods
             const zipToNeighborhood = {
+                // Chicago proper
+                '60605': 'South Loop',
+                '60607': 'West Loop',
+                '60616': 'South Loop',
                 '60653': 'Bronzeville',
                 '60637': 'Woodlawn',
                 '60649': 'South Shore',
@@ -98,8 +102,23 @@ function extractNeighborhood(address) {
                 '60643': 'Beverly',
                 '60621': 'Englewood',
                 '60624': 'West Garfield Park',
-                '60607': 'West Loop',
-                '60616': 'South Loop'
+                '60622': 'Wicker Park',
+                '60640': 'Uptown',
+                '60629': 'Chicago Lawn',
+                '60618': 'Avondale',
+                '60661': 'West Loop',
+                // Suburbs
+                '60402': 'Berwyn',
+                '60453': 'Oak Lawn',
+                '60153': 'Maywood',
+                '60805': 'Evergreen Park',
+                '60452': 'Oak Forest',
+                '60411': 'Chicago Heights',
+                '60202': 'Evanston',
+                '60445': 'Crestwood',
+                '60419': 'Dolton',
+                '60803': 'Alsip',
+                '62703': 'Springfield'
             };
             return zipToNeighborhood[zipMatch[1]] || 'Chicago';
         }

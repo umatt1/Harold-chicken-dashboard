@@ -193,6 +193,27 @@ th {
     letter-spacing: 0.5px;
 }
 
+th[data-sort] {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+th[data-sort]:hover {
+    background: #5568d3;
+}
+
+th[data-sort].sort-asc,
+th[data-sort].sort-desc {
+    background: #5568d3;
+}
+
+.sort-arrow {
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
 tbody tr {
     border-bottom: 1px solid #e9ecef;
     transition: background-color 0.2s ease;

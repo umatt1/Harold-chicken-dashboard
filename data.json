@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2026-02-05T20:37:59.751Z",
+  "lastUpdated": "2026-02-05T20:46:50.168Z",
   "locations": [
     {
       "name": "Harolds Chicken Shack",
       "address": "612 S Wabash Ave, Chicago, IL 60605, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "South Loop",
       "lat": 41.8739686,
       "lng": -87.626306,
       "rating": 3.8,
@@ -244,7 +244,7 @@
     {
       "name": "Harold's Chicken Shack #36 (Wicker Park)",
       "address": "1361 N Milwaukee Ave, Chicago, IL 60622, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Wicker Park",
       "lat": 41.906721,
       "lng": -87.67137699999999,
       "rating": 3.5,
@@ -549,7 +549,7 @@
     {
       "name": "Berwyn Harold's Chicken & Bar",
       "address": "6307 W 26th St, Berwyn, IL 60402, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Berwyn",
       "lat": 41.8435394,
       "lng": -87.78148499999999,
       "rating": 4.3,
@@ -610,7 +610,7 @@
     {
       "name": "Harold's “The Fried Wing King “",
       "address": "1118 W Wilson Ave, Chicago, IL 60640, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Uptown",
       "lat": 41.9655306,
       "lng": -87.65847769999999,
       "rating": 3.6,
@@ -725,7 +725,7 @@
     {
       "name": "Chicago Lawn Harold's Chicken #17",
       "address": "2900 W 63rd St, Chicago, IL 60629, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Chicago Lawn",
       "lat": 41.7794552,
       "lng": -87.69618849999999,
       "rating": 4,
@@ -960,7 +960,7 @@
     {
       "name": "Harold's chicken Oaklawn",
       "address": "4709 W 95th St, Oak Lawn, IL 60453, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Oak Lawn",
       "lat": 41.7198159,
       "lng": -87.73880109999999,
       "rating": 3.8,
@@ -1021,7 +1021,7 @@
     {
       "name": "Harold’s Chicken Shack",
       "address": "713 Roosevelt Rd, Maywood, IL 60153, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Maywood",
       "lat": 41.864612,
       "lng": -87.84130549999999,
       "rating": 4,
@@ -1257,7 +1257,7 @@
     {
       "name": "Harold's Chicken Avondale",
       "address": "3517 N Spaulding Ave, Chicago, IL 60618, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Avondale",
       "lat": 41.945339,
       "lng": -87.7088929,
       "rating": 4,
@@ -1379,7 +1379,7 @@
     {
       "name": "Harold's Chicken Shack",
       "address": "8738 S Kedzie Ave, Evergreen Park, IL 60805, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Evergreen Park",
       "lat": 41.734069999999996,
       "lng": -87.702696,
       "rating": 3.6,
@@ -1620,7 +1620,7 @@
     {
       "name": "Harold’s Chicken & Sports Bar",
       "address": "16200 S Cicero Ave, Oak Forest, IL 60452, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Oak Forest",
       "lat": 41.5976396,
       "lng": -87.73654010000001,
       "rating": 4.1,
@@ -1742,7 +1742,7 @@
     {
       "name": "Harold's Chicken Shack #50",
       "address": "1537 Western Ave, Chicago Heights, IL 60411, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Chicago Heights",
       "lat": 41.502809,
       "lng": -87.6737741,
       "rating": 3.1,
@@ -1795,7 +1795,7 @@
     {
       "name": "Harold's Chicken Shack Evanston",
       "address": "337 W Howard St, Evanston, IL 60202, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Evanston",
       "lat": 42.019550300000006,
       "lng": -87.67447539999999,
       "rating": 3.1,
@@ -1856,7 +1856,7 @@
     {
       "name": "Harold's Chicken On Clinton",
       "address": "115 S Clinton St, Chicago, IL 60661, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "West Loop",
       "lat": 41.8800367,
       "lng": -87.6409645,
       "rating": 2.4,
@@ -1917,7 +1917,7 @@
     {
       "name": "Harold's Chicken Shack",
       "address": "13653 S Cicero Ave, Crestwood, IL 60445, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Crestwood",
       "lat": 41.6440528,
       "lng": -87.7373965,
       "rating": 3.6,
@@ -1978,7 +1978,7 @@
     {
       "name": "Harold's Chicken Shack",
       "address": "15411 Cottage Grove Ave, Dolton, IL 60419, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Dolton",
       "lat": 41.614880299999996,
       "lng": -87.596341,
       "rating": 3.2,
@@ -2039,7 +2039,7 @@
     {
       "name": "Harold's Chicken",
       "address": "11817 S Pulaski Rd, Alsip, IL 60803, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Alsip",
       "lat": 41.678088699999996,
       "lng": -87.7193108,
       "rating": 3.4,
@@ -2100,7 +2100,7 @@
     {
       "name": "Harold's Chicken shack",
       "address": "1126 S Grand Ave E, Springfield, IL 62703, USA",
-      "neighborhood": "Chicago",
+      "neighborhood": "Springfield",
       "lat": 39.7869733,
       "lng": -89.64031469999999,
       "rating": 3.7,
