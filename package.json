@@ -1,0 +1,22 @@
+{
+  "name": "harolds-chicken-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive dashboard for Harold's Chicken Shack locations with Google Reviews data",
+  "main": "fetch-reviews.js",
+  "scripts": {
+    "scrape": "node fetch-reviews.js",
+    "serve": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "keywords": [
+    "harolds-chicken",
+    "chicago",
+    "reviews",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harold's Chicken Shack - Chicago Locations Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍗 Harold's Chicken Shack - Chicago Locations</h1>
+            <p class="subtitle">Explore quality ratings and neighborhoods</p>
+        </header>
+
+        <div class="controls">
+            <button id="mapViewBtn" class="btn btn-active">Map View</button>
+            <button id="tableViewBtn" class="btn">Table View</button>
+            <input type="text" id="searchInput" placeholder="Search by neighborhood or location..." />
+        </div>
+
+        <div id="mapView" class="view-container">
+            <div id="map"></div>
+            <div class="legend">
+                <h3>Quality Rating</h3>
+                <div class="legend-item">
+                    <span class="marker-indicator high"></span>
+                    <span>High (4.0+)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="marker-indicator medium"></span>
+                    <span>Medium (3.0-3.9)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="marker-indicator low"></span>
+                    <span>Low (<3.0)</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tableView" class="view-container" style="display: none;">
+            <table id="locationsTable">
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Address</th>
+                        <th>Neighborhood</th>
+                        <th>Rating</th>
+                        <th>Reviews</th>
+                        <th>Key Phrases</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="detailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle"></h2>
+                <div id="modalBody"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Data sources: Google Places API</p>
+            <p>Last updated: <span id="lastUpdated"></span></p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="tfidf.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
