@@ -197,11 +197,13 @@ th[data-sort] {
     cursor: pointer;
     user-select: none;
     position: relative;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 th[data-sort]:hover {
     background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 th[data-sort].sort-asc,

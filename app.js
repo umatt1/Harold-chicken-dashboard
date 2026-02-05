@@ -186,7 +186,7 @@ function updateTable(locations) {
 }
 
 // Sort table by column
-function sortTable(column) {
+window.sortTable = function(column) {
     if (sortColumn === column) {
         // Toggle direction if clicking same column
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -287,7 +287,7 @@ function updateSortIndicators() {
 }
 
 // Show detailed modal for a location
-function showDetails(locationName) {
+window.showDetails = function(locationName) {
     const location = allLocations.find(loc => loc.name === locationName);
     if (!location) return;
     
