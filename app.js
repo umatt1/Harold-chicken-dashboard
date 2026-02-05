@@ -106,11 +106,23 @@ function displayMarkers(locations) {
                 <p style="margin: 5px 0;"><strong>Neighborhood:</strong> ${location.neighborhood}</p>
                 <p style="margin: 5px 0;"><strong>Address:</strong> ${location.address}</p>
                 <p style="margin: 5px 0;"><strong>Rating:</strong> ⭐ ${location.rating} (${location.reviewCount} reviews)</p>
-                <button onclick="window.showDetails(${JSON.stringify(location.name)})" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Details</button>
+                <button class="view-details-btn" data-location-name="${location.name.replace(/"/g, '&quot;')}" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Details</button>
             </div>
         `;
         
         marker.bindPopup(popupContent);
+        
+        // Attach event listener after popup opens
+        marker.on('popupopen', function() {
+            const btn = document.querySelector('.view-details-btn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    const locationName = this.getAttribute('data-location-name');
+                    window.showDetails(locationName);
+                });
+            }
+        });
+        
         markers.push(marker);
     });
 }
