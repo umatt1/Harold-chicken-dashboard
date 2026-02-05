@@ -106,7 +106,7 @@ function displayMarkers(locations) {
                 <p style="margin: 5px 0;"><strong>Neighborhood:</strong> ${location.neighborhood}</p>
                 <p style="margin: 5px 0;"><strong>Address:</strong> ${location.address}</p>
                 <p style="margin: 5px 0;"><strong>Rating:</strong> ⭐ ${location.rating} (${location.reviewCount} reviews)</p>
-                <button onclick="showDetails(${JSON.stringify(location.name)})" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Details</button>
+                <button onclick="window.showDetails(${JSON.stringify(location.name)})" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">View Details</button>
             </div>
         `;
         
@@ -288,8 +288,12 @@ function updateSortIndicators() {
 
 // Show detailed modal for a location
 window.showDetails = function(locationName) {
+    console.log('showDetails called with:', locationName);
     const location = allLocations.find(loc => loc.name === locationName);
-    if (!location) return;
+    if (!location) {
+        console.error('Location not found:', locationName);
+        return;
+    }
     
     const modal = document.getElementById('detailsModal');
     const modalTitle = document.getElementById('modalTitle');
