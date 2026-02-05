@@ -363,17 +363,69 @@ footer p {
         width: 100%;
     }
 
+    /* Make table scrollable horizontally on mobile */
+    #tableView {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     table {
-        font-size: 0.9em;
+        font-size: 0.85em;
+        min-width: 800px; /* Ensures table doesn't compress too much */
     }
 
     th, td {
         padding: 10px 8px;
+        white-space: nowrap;
+    }
+
+    /* Hide key phrases column on mobile to save space */
+    .key-phrases {
+        display: none;
+    }
+
+    th:last-child {
+        display: none;
+    }
+
+    /* Make filters stack vertically on mobile */
+    .table-filters {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .table-filters select,
+    .table-filters button {
+        width: 100%;
     }
 
     .modal-content {
         width: 95%;
         margin: 10% auto;
         padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    .subtitle {
+        font-size: 0.9em;
+    }
+
+    table {
+        font-size: 0.75em;
+    }
+
+    th, td {
+        padding: 8px 5px;
+    }
+
+    /* Further reduce table columns on very small screens */
+    td:nth-child(2), /* Address column */
+    th:nth-child(2) {
+        display: none;
     }
 }
