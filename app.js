@@ -17,8 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up event listeners
     setupEventListeners();
     
-    // Update last updated time
-    updateTimestamp();
+    // No longer call updateTimestamp() here - it's handled in loadData()
 });
 
 // Initialize Leaflet map
@@ -35,14 +34,14 @@ function initMap() {
 // Load location data with reviews and analyze
 async function loadData() {
     try {
-        const scraper = new ReviewScraper();
+        // Fetch data from data.json (updated daily by GitHub Action)
+        const response = await fetch('data.json');
+        const data = await response.json();
+        
         const tfidf = new TFIDFAnalyzer();
         
-        // Get all locations with reviews
-        const locations = await scraper.getAllLocationsWithReviews();
-        
         // Process each location to extract significant phrases
-        allLocations = locations.map(location => {
+        allLocations = data.locations.map(location => {
             const keyPhrases = tfidf.extractSignificantPhrasesWithNGrams(location.reviews, 5);
             return {
                 ...location,
@@ -55,6 +54,21 @@ async function loadData() {
         // Display data
         displayMarkers(allLocations);
         updateTable(allLocations);
+        
+        // Update timestamp with data.json lastUpdated field
+        if (data.lastUpdated) {
+            const date = new Date(data.lastUpdated);
+            const formatted = date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('lastUpdated').textContent = formatted;
+        } else {
+            updateTimestamp();
+        }
         
     } catch (error) {
         console.error('Error loading data:', error);
