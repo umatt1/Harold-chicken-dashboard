@@ -107,35 +107,117 @@ function extractNeighborhood(address) {
     return 'Chicago';
 }
 
-// Get place details including reviews
+// Get place details including reviews (using new Places API for more reviews)
 async function getPlaceDetails(placeId) {
     try {
-        const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
-            params: {
-                place_id: placeId,
-                fields: 'name,formatted_address,geometry,rating,user_ratings_total,reviews',
-                key: GOOGLE_PLACES_API_KEY
-            }
-        });
+        // The new Places API returns up to 5 "most relevant" reviews by default
+        // To get more reviews, we need to make multiple requests with different language codes
+        // and combine the unique results
+        const allReviews = [];
+        const seenTexts = new Set();
+        
+        // Try different language codes to potentially get different sets of reviews
+        const languageCodes = ['en', 'es', 'pl', 'zh', 'ar', 'ko', 'vi', 'tl', 'hi', 'ur']; // Major languages in Chicago
+        
+        let placeDetails = null;
+        
+        for (const lang of languageCodes) {
+            try {
+                const response = await axios.get(
+                    `https://places.googleapis.com/v1/places/${placeId}`,
+                    {
+                        headers: {
+                            'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+                            'X-Goog-FieldMask': 'displayName,formattedAddress,location,rating,userRatingCount,reviews.text,reviews.rating,reviews.relativePublishTimeDescription,reviews.authorAttribution'
+                        },
+                        params: {
+                            languageCode: lang
+                        }
+                    }
+                );
 
-        // Log API response status
-        if (response.data.status !== 'OK') {
-            console.error(`   ⚠️  API Status: ${response.data.status}`);
-            if (response.data.error_message) {
-                console.error(`   ⚠️  Error: ${response.data.error_message}`);
+                if (response.data) {
+                    const data = response.data;
+                    
+                    // Store place details on first successful request
+                    if (!placeDetails) {
+                        placeDetails = {
+                            name: data.displayName?.text,
+                            formatted_address: data.formattedAddress,
+                            geometry: {
+                                location: {
+                                    lat: data.location?.latitude,
+                                    lng: data.location?.longitude
+                                }
+                            },
+                            rating: data.rating,
+                            user_ratings_total: data.userRatingCount
+                        };
+                    }
+                    
+                    // Collect unique reviews
+                    if (data.reviews && data.reviews.length > 0) {
+                        data.reviews.forEach(review => {
+                            const text = review.text?.text || review.originalText?.text || '';
+                            // Use first 100 chars as unique identifier to avoid exact duplicates
+                            const textKey = text.substring(0, 100).trim().toLowerCase();
+                            if (text && !seenTexts.has(textKey)) {
+                                seenTexts.add(textKey);
+                                allReviews.push({
+                                    text: text,
+                                    rating: review.rating,
+                                    time: review.relativePublishTimeDescription
+                                });
+                            }
+                        });
+                    }
+                }
+                
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 150));
+                
+            } catch (langError) {
+                // Silently continue if a language fails
+                console.log(`   ℹ️  Language ${lang} failed, continuing...`);
             }
         }
+        
+        if (placeDetails && allReviews.length > 0) {
+            placeDetails.reviews = allReviews;
+            console.log(`   ✅ New API: Found ${allReviews.length} unique reviews`);
+            return placeDetails;
+        }
+        
+        throw new Error('New API failed to get reviews');
+        
+    } catch (newApiError) {
+        // If new API fails, fall back to old API
+        console.log(`   ℹ️  New API failed (${newApiError.response?.status || newApiError.message}), using standard API (5 review limit)`);
+        
+        try {
+            const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+                params: {
+                    place_id: placeId,
+                    fields: 'name,formatted_address,geometry,rating,user_ratings_total,reviews',
+                    key: GOOGLE_PLACES_API_KEY
+                }
+            });
 
-        if (response.data.result) {
-            return response.data.result;
+            if (response.data.status !== 'OK') {
+                console.error(`   ⚠️  API Status: ${response.data.status}`);
+                if (response.data.error_message) {
+                    console.error(`   ⚠️  Error: ${response.data.error_message}`);
+                }
+            }
+
+            if (response.data.result) {
+                return response.data.result;
+            }
+            return null;
+        } catch (error) {
+            console.error(`   ❌ Error getting details for place ${placeId}:`, error.message);
+            return null;
         }
-        return null;
-    } catch (error) {
-        console.error(`   ❌ Error getting details for place ${placeId}:`, error.message);
-        if (error.response) {
-            console.error(`   ❌ Status: ${error.response.status}`, error.response.data);
-        }
-        return null;
     }
 }
 
