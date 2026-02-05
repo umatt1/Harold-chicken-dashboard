@@ -20,21 +20,43 @@
             <input type="text" id="searchInput" placeholder="Search by neighborhood or location..." />
         </div>
 
+        <div id="tableFilters" class="table-filters" style="display: none;">
+            <select id="neighborhoodFilter">
+                <option value="">All Neighborhoods</option>
+            </select>
+            <select id="ratingFilter">
+                <option value="">All Ratings</option>
+                <option value="4.0-5.0">4.0+ Stars</option>
+                <option value="3.5-3.9">3.5-3.9 Stars</option>
+                <option value="3.0-3.4">3.0-3.4 Stars</option>
+                <option value="0-2.9">Below 3.0 Stars</option>
+            </select>
+            <button id="clearFilters" class="btn">Clear Filters</button>
+        </div>
+
         <div id="mapView" class="view-container">
             <div id="map"></div>
             <div class="legend">
                 <h3>Quality Rating</h3>
                 <div class="legend-item">
-                    <span class="marker-indicator high"></span>
-                    <span>High (4.0+)</span>
+                    <span class="marker-indicator" style="background: rgb(40, 167, 69);"></span>
+                    <span>Excellent (4.3+)</span>
                 </div>
                 <div class="legend-item">
-                    <span class="marker-indicator medium"></span>
-                    <span>Medium (3.0-3.9)</span>
+                    <span class="marker-indicator" style="background: rgb(150, 215, 120);"></span>
+                    <span>Good (3.9-4.2)</span>
                 </div>
                 <div class="legend-item">
-                    <span class="marker-indicator low"></span>
-                    <span>Low (<3.0)</span>
+                    <span class="marker-indicator" style="background: rgb(255, 193, 69);"></span>
+                    <span>Average (3.5-3.8)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="marker-indicator" style="background: rgb(220, 165, 69);"></span>
+                    <span>Below Average (3.2-3.4)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="marker-indicator" style="background: rgb(220, 53, 69);"></span>
+                    <span>Poor (<3.2)</span>
                 </div>
             </div>
         </div>

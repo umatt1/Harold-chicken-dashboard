@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up event listeners
     setupEventListeners();
     
+    // Populate filter dropdowns
+    populateFilters();
+    
     // No longer call updateTimestamp() here - it's handled in loadData()
 });
 
@@ -110,11 +113,46 @@ function displayMarkers(locations) {
     });
 }
 
-// Get marker color based on rating
+// Get marker color based on rating using dynamic gradient
 function getMarkerColor(rating) {
-    if (rating >= 4.0) return '#28a745'; // Green
-    if (rating >= 3.0) return '#ffc107'; // Yellow
-    return '#dc3545'; // Red
+    // For Harold's, ratings typically range from 3.0 to 4.5
+    // Use a gradient from red (poor) to yellow (okay) to green (great)
+    const minRating = 3.0;
+    const maxRating = 4.5;
+    
+    // Normalize rating to 0-1 scale
+    const normalized = Math.max(0, Math.min(1, (rating - minRating) / (maxRating - minRating)));
+    
+    // Create gradient: red -> orange -> yellow -> light green -> green
+    let r, g, b;
+    
+    if (normalized < 0.25) {
+        // Red to Orange (3.0 - 3.375)
+        const t = normalized / 0.25;
+        r = 220;
+        g = Math.round(53 + (112 * t)); // 53 to 165
+        b = 69;
+    } else if (normalized < 0.5) {
+        // Orange to Yellow (3.375 - 3.75)
+        const t = (normalized - 0.25) / 0.25;
+        r = Math.round(220 + (35 * t)); // 220 to 255
+        g = Math.round(165 + (28 * t)); // 165 to 193
+        b = 69;
+    } else if (normalized < 0.75) {
+        // Yellow to Light Green (3.75 - 4.125)
+        const t = (normalized - 0.5) / 0.25;
+        r = Math.round(255 - (105 * t)); // 255 to 150
+        g = Math.round(193 + (22 * t)); // 193 to 215
+        b = Math.round(69 + (51 * t)); // 69 to 120
+    } else {
+        // Light Green to Green (4.125 - 4.5)
+        const t = (normalized - 0.75) / 0.25;
+        r = Math.round(150 - (110 * t)); // 150 to 40
+        g = Math.round(215 - (48 * t)); // 215 to 167
+        b = Math.round(120 - (51 * t)); // 120 to 69
+    }
+    
+    return `rgb(${r}, ${g}, ${b})`;
 }
 
 // Update the table view
@@ -126,13 +164,14 @@ function updateTable(locations) {
         const row = document.createElement('tr');
         row.onclick = () => showDetails(location.name);
         
-        const ratingClass = location.rating >= 4.0 ? 'high' : location.rating >= 3.0 ? 'medium' : 'low';
+        // Use dynamic color based on rating
+        const color = getMarkerColor(location.rating);
         
         row.innerHTML = `
             <td><strong>${location.name}</strong></td>
             <td>${location.address}</td>
             <td>${location.neighborhood}</td>
-            <td><span class="rating ${ratingClass}">⭐ ${location.rating}</span></td>
+            <td><span class="rating" style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 4px;">⭐ ${location.rating}</span></td>
             <td>${location.reviewCount}</td>
             <td class="key-phrases">${location.keyPhrases.join(', ')}</td>
         `;
@@ -152,7 +191,7 @@ function showDetails(locationName) {
     
     modalTitle.textContent = location.name;
     
-    const ratingClass = location.rating >= 4.0 ? 'high' : location.rating >= 3.0 ? 'medium' : 'low';
+    const color = getMarkerColor(location.rating);
     
     modalBody.innerHTML = `
         <div class="location-details">
@@ -160,7 +199,7 @@ function showDetails(locationName) {
                 <h3>Location Information</h3>
                 <p><strong>Address:</strong> ${location.address}</p>
                 <p><strong>Neighborhood:</strong> ${location.neighborhood}</p>
-                <p><strong>Rating:</strong> <span class="rating ${ratingClass}">⭐ ${location.rating}</span></p>
+                <p><strong>Rating:</strong> <span class="rating" style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 4px;">⭐ ${location.rating}</span></p>
                 <p><strong>Total Reviews:</strong> ${location.reviewCount}</p>
             </div>
             
@@ -209,6 +248,11 @@ function setupEventListeners() {
         handleSearch(e.target.value);
     });
     
+    // Table filters
+    document.getElementById('neighborhoodFilter').addEventListener('change', applyFilters);
+    document.getElementById('ratingFilter').addEventListener('change', applyFilters);
+    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    
     // Modal close
     const modal = document.getElementById('detailsModal');
     const closeBtn = document.querySelector('.close');
@@ -230,12 +274,14 @@ function switchView(view) {
     
     const mapView = document.getElementById('mapView');
     const tableView = document.getElementById('tableView');
+    const tableFilters = document.getElementById('tableFilters');
     const mapBtn = document.getElementById('mapViewBtn');
     const tableBtn = document.getElementById('tableViewBtn');
     
     if (view === 'map') {
         mapView.style.display = 'block';
         tableView.style.display = 'none';
+        tableFilters.style.display = 'none';
         mapBtn.classList.add('btn-active');
         tableBtn.classList.remove('btn-active');
         
@@ -246,35 +292,70 @@ function switchView(view) {
     } else {
         mapView.style.display = 'none';
         tableView.style.display = 'block';
+        tableFilters.style.display = 'flex';
         mapBtn.classList.remove('btn-active');
         tableBtn.classList.add('btn-active');
     }
 }
 
-// Handle search
-function handleSearch(query) {
-    if (!query.trim()) {
-        // Show all locations
-        displayMarkers(allLocations);
-        updateTable(allLocations);
-        return;
+// Populate filter dropdowns
+function populateFilters() {
+    const neighborhoodFilter = document.getElementById('neighborhoodFilter');
+    const neighborhoods = [...new Set(allLocations.map(loc => loc.neighborhood))].sort();
+    
+    neighborhoods.forEach(neighborhood => {
+        const option = document.createElement('option');
+        option.value = neighborhood;
+        option.textContent = neighborhood;
+        neighborhoodFilter.appendChild(option);
+    });
+}
+
+// Apply filters to table
+function applyFilters() {
+    const neighborhoodFilter = document.getElementById('neighborhoodFilter').value;
+    const ratingFilter = document.getElementById('ratingFilter').value;
+    const searchQuery = document.getElementById('searchInput').value;
+    
+    let filtered = allLocations;
+    
+    // Apply search first
+    if (searchQuery.trim()) {
+        filtered = filtered.filter(location => 
+            location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            location.neighborhood.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            location.keyPhrases.some(phrase => phrase.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
     }
     
-    const filtered = allLocations.filter(location => 
-        location.name.toLowerCase().includes(query.toLowerCase()) ||
-        location.neighborhood.toLowerCase().includes(query.toLowerCase()) ||
-        location.address.toLowerCase().includes(query.toLowerCase()) ||
-        location.keyPhrases.some(phrase => phrase.toLowerCase().includes(query.toLowerCase()))
-    );
+    // Apply neighborhood filter
+    if (neighborhoodFilter) {
+        filtered = filtered.filter(loc => loc.neighborhood === neighborhoodFilter);
+    }
+    
+    // Apply rating filter
+    if (ratingFilter) {
+        const [min, max] = ratingFilter.split('-').map(parseFloat);
+        filtered = filtered.filter(loc => loc.rating >= min && loc.rating <= max);
+    }
     
     displayMarkers(filtered);
     updateTable(filtered);
-    
-    // If in map view and results found, fit bounds
-    if (currentView === 'map' && filtered.length > 0) {
-        const bounds = L.latLngBounds(filtered.map(loc => [loc.lat, loc.lng]));
-        map.fitBounds(bounds, { padding: [50, 50] });
-    }
+}
+
+// Clear all filters
+function clearFilters() {
+    document.getElementById('neighborhoodFilter').value = '';
+    document.getElementById('ratingFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    displayMarkers(allLocations);
+    updateTable(allLocations);
+}
+
+// Handle search
+function handleSearch(query) {
+    applyFilters(); // Use unified filter system
 }
 
 // Update timestamp

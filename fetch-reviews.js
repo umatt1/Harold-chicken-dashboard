@@ -9,90 +9,102 @@ require('dotenv').config();
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
-// Harold's Chicken locations to fetch reviews for
-const LOCATIONS = [
-    {
-        name: "Harold's Chicken Shack #1",
-        address: "338 E 47th St, Chicago, IL 60653",
-        neighborhood: "Bronzeville",
-        placeId: null // Will be found via search
-    },
-    {
-        name: "Harold's Chicken #2",
-        address: "6458 S Cottage Grove Ave, Chicago, IL 60637",
-        neighborhood: "Woodlawn",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken Shack #3",
-        address: "7159 S Stony Island Ave, Chicago, IL 60649",
-        neighborhood: "South Shore",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken #4",
-        address: "6316 S Western Ave, Chicago, IL 60636",
-        neighborhood: "Chicago Lawn",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken Shack #5",
-        address: "645 E 87th St, Chicago, IL 60619",
-        neighborhood: "Chatham",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken #6",
-        address: "8459 S Cottage Grove Ave, Chicago, IL 60619",
-        neighborhood: "Chatham",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken Shack #7",
-        address: "3801 S Indiana Ave, Chicago, IL 60653",
-        neighborhood: "Grand Boulevard",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken #8",
-        address: "1208 E 53rd St, Chicago, IL 60615",
-        neighborhood: "Hyde Park",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken Shack #9",
-        address: "5351 W Madison St, Chicago, IL 60644",
-        neighborhood: "Austin",
-        placeId: null
-    },
-    {
-        name: "Harold's Chicken #10",
-        address: "7044 S Ashland Ave, Chicago, IL 60636",
-        neighborhood: "Englewood",
-        placeId: null
-    }
-];
-
-// Find place by address using Google Places API
-async function findPlaceByAddress(address) {
+// Search for all Harold's Chicken locations in Chicago
+async function findAllHaroldsLocations() {
     try {
-        const response = await axios.get('https://maps.googleapis.com/maps/api/place/findplacefromtext/json', {
-            params: {
-                input: address,
-                inputtype: 'textquery',
-                fields: 'place_id,name,geometry,rating,user_ratings_total,business_status',
+        console.log('🔍 Searching for all Harold\'s Chicken locations in Chicago...\n');
+        
+        let allLocations = [];
+        let nextPageToken = null;
+        let pageCount = 0;
+        
+        do {
+            const params = {
+                query: "Harold's Chicken Chicago",
                 key: GOOGLE_PLACES_API_KEY
+            };
+            
+            if (nextPageToken) {
+                params.pagetoken = nextPageToken;
+                // Google requires a short delay before requesting next page
+                await new Promise(resolve => setTimeout(resolve, 2000));
             }
-        });
+            
+            const response = await axios.get('https://maps.googleapis.com/maps/api/place/textsearch/json', {
+                params
+            });
 
-        if (response.data.candidates && response.data.candidates.length > 0) {
-            return response.data.candidates[0];
-        }
-        return null;
+            if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
+                console.error('❌ Search failed:', response.data.status);
+                if (response.data.error_message) {
+                    console.error('   Error:', response.data.error_message);
+                }
+                break;
+            }
+
+            if (response.data.results && response.data.results.length > 0) {
+                const locations = response.data.results.map(place => ({
+                    name: place.name,
+                    address: place.formatted_address,
+                    neighborhood: extractNeighborhood(place.formatted_address),
+                    placeId: place.place_id,
+                    lat: place.geometry.location.lat,
+                    lng: place.geometry.location.lng,
+                    rating: place.rating || 0,
+                    reviewCount: place.user_ratings_total || 0
+                }));
+                
+                allLocations = allLocations.concat(locations);
+                pageCount++;
+                console.log(`   Page ${pageCount}: Found ${locations.length} locations (Total: ${allLocations.length})`);
+            }
+
+            nextPageToken = response.data.next_page_token || null;
+            
+        } while (nextPageToken);
+
+        console.log(`\n✅ Found ${allLocations.length} Harold's Chicken locations total\n`);
+        return allLocations;
+        
     } catch (error) {
-        console.error(`   ❌ Error finding place for ${address}:`, error.message);
-        return null;
+        console.error('❌ Error searching for locations:', error.message);
+        return [];
     }
+}
+
+// Extract neighborhood from address (simplified - gets the neighborhood/area name)
+function extractNeighborhood(address) {
+    // Chicago addresses format: "Street, Chicago, IL ZIP"
+    // Try to extract neighborhood from context or use general area
+    const parts = address.split(',');
+    if (parts.length >= 2) {
+        // Return the area before "Chicago" or use zip code area
+        const zipMatch = address.match(/IL\s+(\d{5})/);
+        if (zipMatch) {
+            // Map common Chicago zip codes to neighborhoods (simplified)
+            const zipToNeighborhood = {
+                '60653': 'Bronzeville',
+                '60637': 'Woodlawn',
+                '60649': 'South Shore',
+                '60636': 'Englewood',
+                '60619': 'Chatham',
+                '60615': 'Hyde Park',
+                '60644': 'Austin',
+                '60620': 'Auburn Gresham',
+                '60651': 'West Garfield Park',
+                '60617': 'South Chicago',
+                '60628': 'Roseland',
+                '60652': 'Ashburn',
+                '60643': 'Beverly',
+                '60621': 'Englewood',
+                '60624': 'West Garfield Park',
+                '60607': 'West Loop',
+                '60616': 'South Loop'
+            };
+            return zipToNeighborhood[zipMatch[1]] || 'Chicago';
+        }
+    }
+    return 'Chicago';
 }
 
 // Get place details including reviews
@@ -137,26 +149,35 @@ async function scrapeAllLocations() {
         process.exit(1);
     }
 
+    // First, find all Harold's Chicken locations
+    const locations = await findAllHaroldsLocations();
+    
+    if (locations.length === 0) {
+        console.error('❌ No Harold\'s Chicken locations found');
+        return [];
+    }
+
     const results = [];
 
-    for (const location of LOCATIONS) {
-        console.log(`📍 Fetching: ${location.name} (${location.address})`);
-
-        // Search using business name + city for better results
-        const searchQuery = `${location.name} ${location.address}`;
-        const place = await findPlaceByAddress(searchQuery);
-        
-        if (!place) {
-            console.log(`   ⚠️  Could not find place, skipping...\n`);
-            continue;
-        }
-        
-        console.log(`   Found: "${place.name}" (Status: ${place.business_status || 'unknown'})`);
+    for (const location of locations) {
+        console.log(`📍 Fetching details: ${location.name}`);
+        console.log(`   Address: ${location.address}`);
 
         // Get detailed information including reviews
-        const details = await getPlaceDetails(place.place_id);
+        const details = await getPlaceDetails(location.placeId);
         if (!details) {
-            console.log(`   ⚠️  Could not get details, skipping...\n`);
+            console.log(`   ⚠️  Could not get details, using basic info...\n`);
+            // Still add the location with basic info
+            results.push({
+                name: location.name,
+                address: location.address,
+                neighborhood: location.neighborhood,
+                lat: location.lat,
+                lng: location.lng,
+                rating: location.rating,
+                reviewCount: location.reviewCount,
+                reviews: []
+            });
             continue;
         }
 
@@ -169,10 +190,10 @@ async function scrapeAllLocations() {
             name: location.name,
             address: details.formatted_address || location.address,
             neighborhood: location.neighborhood,
-            lat: details.geometry?.location?.lat || place.geometry?.location?.lat || 0,
-            lng: details.geometry?.location?.lng || place.geometry?.location?.lng || 0,
-            rating: details.rating || 0,
-            reviewCount: details.user_ratings_total || 0,
+            lat: details.geometry?.location?.lat || location.lat,
+            lng: details.geometry?.location?.lng || location.lng,
+            rating: details.rating || location.rating,
+            reviewCount: details.user_ratings_total || location.reviewCount,
             reviews: reviews
         };
 
