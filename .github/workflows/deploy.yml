@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - copilot/setup-harolds-chicken-dashboard
   workflow_dispatch:
 
 permissions:
