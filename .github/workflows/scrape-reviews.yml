@@ -13,6 +13,9 @@ permissions:
 
 jobs:
   scrape-and-update:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     
     steps:
@@ -45,3 +48,17 @@ jobs:
           git add data.json
           git commit -m "🤖 Update review data - $(date +'%Y-%m-%d %H:%M:%S UTC')"
           git push
+      
+      - name: Setup Pages
+        if: steps.git-check.outputs.changed == 'true'
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        if: steps.git-check.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      
+      - name: Deploy to GitHub Pages
+        if: steps.git-check.outputs.changed == 'true'
+        uses: actions/deploy-pages@v4
