@@ -15,22 +15,90 @@ An interactive dashboard showcasing Harold's Chicken Shack locations across Chic
 
 Visit the live dashboard: [Harold's Chicken Dashboard](https://umatt1.github.io/Harold-chicken-dashboard/)
 
+## 🤖 Bot Scraping - Google Reviews Data Collection
+
+The dashboard uses automated scraping via the **Google Places API** to collect real review data for all Harold's Chicken locations. This is handled by the `fetch-reviews.js` script.
+
+### How the Scraper Works
+
+1. **Location Discovery**: The bot searches for "Harold's Chicken Chicago" using Google's Text Search API, automatically paginating through all results to find every location.
+
+2. **Place Details Retrieval**: For each discovered location, the script fetches detailed information including:
+   - Name and address
+   - Geographic coordinates (lat/lng)
+   - Overall rating and total review count
+   - Up to 5 recent reviews per location (Google API limit)
+
+3. **Neighborhood Mapping**: Addresses are automatically mapped to Chicago neighborhoods using ZIP code lookups (e.g., 60619 → Chatham, 60615 → Hyde Park).
+
+4. **Data Export**: All collected data is saved to `data.json`, which the static site reads to populate the dashboard.
+
+### Running the Scraper
+
+```bash
+# Install dependencies
+npm install
+
+# Set up your Google Places API key
+cp .env.example .env
+# Edit .env and add your GOOGLE_PLACES_API_KEY
+
+# Run the scraper
+node fetch-reviews.js
+```
+
+### API Requirements
+
+- **Google Places API Key**: Required for fetching location and review data
+- **Enabled APIs**: Places API, Maps JavaScript API
+- **Rate Limits**: The script includes built-in delays to respect Google's rate limits
+
+### Data Structure
+
+The scraper outputs JSON with the following structure for each location:
+
+```json
+{
+  "name": "Harold's Chicken Shack #55",
+  "address": "123 E 87th St, Chicago, IL 60619",
+  "neighborhood": "Chatham",
+  "placeId": "ChIJ...",
+  "lat": 41.7358,
+  "lng": -87.6056,
+  "rating": 4.2,
+  "reviewCount": 245,
+  "reviews": [
+    {
+      "author": "John D.",
+      "rating": 5,
+      "text": "Best chicken in the city!",
+      "time": "2 months ago"
+    }
+  ]
+}
+```
+
 ## 🏗️ Technical Architecture
 
 ### Components
 
-1. **index.html**: Main HTML structure and layout
-2. **styles.css**: Responsive CSS styling with modern design
-3. **app.js**: Main application logic, UI interactions, and data visualization
-4. **scraper.js**: Google Reviews scraper (simulated with sample data)
-5. **tfidf.js**: TF-IDF algorithm implementation for phrase extraction
-6. **deploy.yml**: GitHub Actions workflow for automatic deployment
+| File | Description |
+|------|-------------|
+| `index.html` | Main HTML structure and layout |
+| `styles.css` | Responsive CSS styling with modern design |
+| `app.js` | Main application logic, UI interactions, and data visualization |
+| `fetch-reviews.js` | **Google Places API scraper** - collects real review data |
+| `scraper.js` | Client-side data handler (loads from data.json) |
+| `tfidf.js` | TF-IDF algorithm implementation for phrase extraction |
+| `data.json` | Scraped location and review data |
+| `.github/workflows/` | GitHub Actions for automatic deployment |
 
 ### Technologies Used
 
 - **Leaflet.js**: Interactive mapping library
 - **Vanilla JavaScript**: No framework dependencies for fast loading
 - **CSS3**: Modern styling with gradients, animations, and flexbox
+- **Node.js + Axios**: Server-side scraping with Google Places API
 - **GitHub Actions**: CI/CD for automatic deployment to GitHub Pages
 
 ## 🔬 TF-IDF Algorithm
@@ -41,18 +109,15 @@ The dashboard uses a custom TF-IDF (Term Frequency-Inverse Document Frequency) i
 - **IDF (Inverse Document Frequency)**: Measures how unique/significant a term is across all documents (higher for rare terms)
 - **TF-IDF Score**: TF × IDF = Combines frequency with uniqueness to identify the most significant terms
 
-This algorithm identifies the most meaningful phrases that distinguish each location's reviews, filtering out common words and highlighting unique characteristics mentioned by reviewers.
+### How It Identifies Significant Phrases
 
-## 📊 Data Structure
+The algorithm works by comparing word frequency within a single location's reviews against frequency across ALL locations:
 
-Each location includes:
-- Name and address
-- Geographic coordinates (latitude/longitude)
-- Neighborhood classification
-- Quality rating (1-5 stars)
-- Review count
-- Sample reviews
-- Extracted key phrases (via TF-IDF)
+```
+Significance = (Word frequency at this location) / (Word frequency across all locations)
+```
+
+This surfaces phrases that are **uniquely characteristic** of each location - not just common words like "chicken" or "good", but specific mentions like "mild sauce", "gizzards", or "drive-thru speed" that distinguish one Harold's from another.
 
 ## 🚀 Getting Started
 
@@ -64,7 +129,12 @@ git clone https://github.com/umatt1/Harold-chicken-dashboard.git
 cd Harold-chicken-dashboard
 ```
 
-2. Open `index.html` in a web browser:
+2. Install dependencies (for scraping):
+```bash
+npm install
+```
+
+3. Open `index.html` in a web browser:
 ```bash
 # Using Python 3
 python -m http.server 8000
@@ -75,7 +145,16 @@ npx serve
 # Or simply open index.html directly in your browser
 ```
 
-3. Visit `http://localhost:8000` in your browser
+4. Visit `http://localhost:8000` in your browser
+
+### Refreshing Review Data
+
+To update the dashboard with fresh review data:
+
+1. Ensure your `.env` file has a valid `GOOGLE_PLACES_API_KEY`
+2. Run `node fetch-reviews.js`
+3. Commit and push the updated `data.json`
+4. GitHub Actions will automatically redeploy
 
 ### Deployment to GitHub Pages
 
@@ -87,22 +166,6 @@ The dashboard automatically deploys to GitHub Pages via GitHub Actions when you 
 4. The workflow will automatically build and deploy
 
 ## 🎨 Customization
-
-### Adding More Locations
-
-Edit `scraper.js` and add locations to the `this.locations` array:
-
-```javascript
-{
-    name: "Harold's Chicken Shack #11",
-    address: "Your Address Here",
-    neighborhood: "Neighborhood Name",
-    lat: 41.xxxx,
-    lng: -87.xxxx,
-    rating: 4.x,
-    reviewCount: xxx
-}
-```
 
 ### Modifying the TF-IDF Algorithm
 
@@ -140,6 +203,7 @@ This project is open source and available under the MIT License.
 - Harold's Chicken Shack for being a Chicago institution
 - OpenStreetMap for map tiles
 - Leaflet.js for the mapping library
+- Google Places API for location and review data
 - The Chicago community for their reviews and support
 
 ## 📞 Contact
